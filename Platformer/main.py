@@ -5,8 +5,6 @@ import pygame
 from os import listdir
 from os.path import isfile, join
 
-#ЛАЛАЛАЛЛАЛАЛАЛЛАЛАЛАЛАЛЛАЛАЛАЛЛАЛАЛАЛАЛЛАЛАЛА
-
 pygame.init()
 
 pygame.display.set_caption("Platformer")               # Заголовок окна
