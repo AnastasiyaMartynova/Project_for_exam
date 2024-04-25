@@ -204,6 +204,20 @@ class Finish(Object):
         self.image.blit(finish, (0, 0))
         self.mask = pygame.mask.from_surface(self.image)
 
+def get_thorn(size):                                                                       
+    path = join("assets", "Enemies", "Thorn.png")
+    image = pygame.image.load(path).convert_alpha()
+    surface = pygame.Surface((size, size), pygame.SRCALPHA, 32)
+    rect = pygame.Rect(0, 0, size, size)                                                  
+    surface.blit(image, (0, 0), rect)                                                      
+    return pygame.transform.scale2x(surface)
+
+class Thorn(Object):
+    def __init__(self, x, y, size):
+        super().__init__(x, y, size, size)
+        thorn = get_thorn(size)
+        self.image.blit(thorn, (0, 0))
+        self.mask = pygame.mask.from_surface(self.image)
 
 
 def get_background(name):
@@ -302,6 +316,11 @@ def main(window):
 
     objects = [*floor, Block(0, HEIGHT - block_size * 2, block_size),
                Block(block_size * 3, HEIGHT - block_size * 4, block_size), start, finish] 
+    
+    thorn = Thorn(WIDTH // 2, HEIGHT - block_size * 1.6 , block_size)
+
+    objects = [*floor, Block(0, HEIGHT - block_size * 2, block_size),
+               Block(block_size * 3, HEIGHT - block_size * 4, block_size), start, finish, thorn]
 
     run = True
     while run:
