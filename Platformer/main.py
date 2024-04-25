@@ -172,6 +172,39 @@ class Block(Object):
         self.mask = pygame.mask.from_surface(self.image)
 
 
+def get_start(size):                                                                       
+    path = join("assets", "Checkpoint", "Start.png")
+    image = pygame.image.load(path).convert_alpha()
+    surface = pygame.Surface((size, size), pygame.SRCALPHA, 32)
+    rect = pygame.Rect(0, 0, size, size)                                                  
+    surface.blit(image, (0, 0), rect)                                                      
+    return pygame.transform.scale2x(surface)
+
+
+def get_finish(size):                                                                       
+    path = join("assets", "Checkpoint", "Finish.png")
+    image = pygame.image.load(path).convert_alpha()
+    surface = pygame.Surface((size, size), pygame.SRCALPHA, 32)
+    rect = pygame.Rect(0, 0, size, size)                                                  
+    surface.blit(image, (0, 0), rect)                                                      
+    return pygame.transform.scale2x(surface)
+
+class Start(Object):
+    def __init__(self, x, y, size):
+        super().__init__(x, y, size, size)
+        start = get_start(size)
+        self.image.blit(start, (0, 0))
+        self.mask = pygame.mask.from_surface(self.image)
+
+
+class Finish(Object):
+    def __init__(self, x, y, size):
+        super().__init__(x, y, size, size)
+        finish = get_finish(size)
+        self.image.blit(finish, (0, 0))
+        self.mask = pygame.mask.from_surface(self.image)
+
+
 
 def get_background(name):
     image = pygame.image.load(join("assets", "Background", name))
@@ -262,6 +295,13 @@ def main(window):
 
     offset_x = 0
     scroll_area_width = 200
+
+
+    start = Start(200, HEIGHT - block_size * 1.5, block_size) 
+    finish = Finish(WIDTH - block_size * 3, HEIGHT - block_size * 1.5, block_size) 
+
+    objects = [*floor, Block(0, HEIGHT - block_size * 2, block_size),
+               Block(block_size * 3, HEIGHT - block_size * 4, block_size), start, finish] 
 
     run = True
     while run:
