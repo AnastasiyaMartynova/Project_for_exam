@@ -151,7 +151,7 @@ class Player(pygame.sprite.Sprite):
         win.blit(self.sprite, (self.rect.x - offset_x, self.rect.y))                   # Позиция определяется как (self.rect.x - offset_x, self.rect.y). Здесь offset_x используется для смещения спрайта на экране. Спрайт отображается на экране в его текущем положении, учитывая смещение по оси X.
 
 
-class Object(pygame.sprite.Sprite):
+class Object(pygame.sprite.Sprite):                                                    # Представление объектов
     def __init__(self, x, y, width, height, name=None):
         super().__init__()
         self.rect = pygame.Rect(x, y, width, height)
@@ -160,7 +160,7 @@ class Object(pygame.sprite.Sprite):
         self.height = height
         self.name = name
 
-    def draw(self, win, offset_x):
+    def draw(self, win, offset_x):                                                     # Отрисовка на экран
         win.blit(self.image, (self.rect.x - offset_x, self.rect.y))
 
 
@@ -173,8 +173,8 @@ class Block(Object):
 
 
 def get_start(size):                                                                       
-    path = join("assets", "Checkpoint", "Start.png")
-    image = pygame.image.load(path).convert_alpha()
+    path = join("assets", "Checkpoint", "Start.png")                                   # Все функции ниже с припиской get для взятия спрайтов объектов
+    image = pygame.image.load(path).convert_alpha()                                    # Классы ниже - это сами объекты
     surface = pygame.Surface((size, size), pygame.SRCALPHA, 32)
     rect = pygame.Rect(0, 0, size, size)                                                  
     surface.blit(image, (0, 0), rect)                                                      
@@ -220,25 +220,25 @@ class Thorn(Object):
         self.mask = pygame.mask.from_surface(self.image)
 
 
-def get_background(name):
+def get_background(name):                                                               # Это фон, он состоит из множетсва фрагментов изображения
     image = pygame.image.load(join("assets", "Background", name))
-    _, _, width, height = image.get_rect()
-    tiles = []
+    _, _, width, height = image.get_rect()                                              # Прямоугольник, который описывает границы изображения, в _ назначаются другие координаты
+    tiles = []                                                                          # Список для позиций фрагментов
 
-    for i in range(WIDTH // width + 1):
-        for j in range(HEIGHT // height + 1):
-            pos = (i * width, j * height)
-            tiles.append(pos)
+    for i in range(WIDTH // width + 1):                                                 # Цикл проходит через диапазон горизонтальных фрагментов
+        for j in range(HEIGHT // height + 1):                                           # Вертикальных
+            pos = (i * width, j * height)                                               # Вычисляет позицию каждого фрагмента на основе его ширины и высоты
+            tiles.append(pos)                                                           # Добавить каждую позицию в список
 
     return tiles, image
 
 
-def draw(window, background, bg_image, player, objects, offset_x):
+def draw(window, background, bg_image, player, objects, offset_x):                      # Отрисовка всего на экран
     for tile in background:
-        window.blit(bg_image, tile)
+        window.blit(bg_image, tile)                                                     # Эффект плавного движения фона
 
     for obj in objects:
-        obj.draw(window, offset_x)
+        obj.draw(window, offset_x)                                                      # offset_x для смещения объектов при прокрутке экрана
 
     player.draw(window, offset_x)
 
@@ -291,7 +291,7 @@ def handle_move(player, objects):
     to_check = [collide_left, collide_right, *vertical_collide]
 
     for obj in to_check:
-        if obj and obj.name == "fire":
+        if obj and obj.name == "thorn":
             player.make_hit()
 
 
