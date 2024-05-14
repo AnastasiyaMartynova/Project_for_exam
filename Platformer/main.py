@@ -204,20 +204,35 @@ class Finish(Object):
         self.image.blit(finish, (0, 0))
         self.mask = pygame.mask.from_surface(self.image)
 
-def get_thorn(size):                                                                       
-    path = join("assets", "Enemies", "Thorn.png")
-    image = pygame.image.load(path).convert_alpha()
-    surface = pygame.Surface((size, size), pygame.SRCALPHA, 32)
-    rect = pygame.Rect(0, 0, size, size)                                                  
-    surface.blit(image, (0, 0), rect)                                                      
-    return pygame.transform.scale2x(surface)
-
 class Thorn(Object):
-    def __init__(self, x, y, size):
-        super().__init__(x, y, size, size)
-        thorn = get_thorn(size)
-        self.image.blit(thorn, (0, 0))
+    ANIMATION_DELAY = 3
+
+    def __init__(self, x, y, width, height):
+        super().__init__(x, y, width, height, "thorn")
+        self.fire = load_sprite_sheets("Enemies", "Thorn", width, height)
+        self.image = self.fire["sleep"][0]
         self.mask = pygame.mask.from_surface(self.image)
+        self.animation_count = 0
+        self.animation_name = "sleep"
+
+    def awake(self):
+        self.animation_name = "awake"
+
+    def sleep(self):
+        self.animation_name = "sleep"
+
+    def loop(self):
+        sprites = self.fire[self.animation_name]
+        sprite_index = (self.animation_count //
+                        self.ANIMATION_DELAY) % len(sprites)
+        self.image = sprites[sprite_index]
+        self.animation_count += 1
+
+        self.rect = self.image.get_rect(topleft=(self.rect.x, self.rect.y))
+        self.mask = pygame.mask.from_surface(self.image)
+
+        if self.animation_count // self.ANIMATION_DELAY > len(sprites):
+            self.animation_count = 0
 
 
 def get_background(name):                                                               # Это фон, он состоит из множетсва фрагментов изображения
@@ -313,11 +328,9 @@ def main(window):
 
     start = Start(200, HEIGHT - block_size * 1.5, block_size) 
     finish = Finish(WIDTH - block_size * 3, HEIGHT - block_size * 1.5, block_size) 
-
-    objects = [*floor, Block(0, HEIGHT - block_size * 2, block_size),
-               Block(block_size * 3, HEIGHT - block_size * 4, block_size), start, finish] 
     
-    thorn = Thorn(WIDTH // 2, HEIGHT - block_size * 1.6 , block_size)
+    thorn = Thorn(500, HEIGHT - block_size - 64, 16, 32)
+    thorn.awake()
 
     objects = [*floor, Block(0, HEIGHT - block_size * 2, block_size),
                Block(block_size * 3, HEIGHT - block_size * 4, block_size), start, finish, thorn]
@@ -336,6 +349,9 @@ def main(window):
                     player.jump()
 
         player.loop(FPS)
+
+        thorn.loop()
+
         handle_move(player, objects)
         draw(window, background, bg_image, player, objects, offset_x)
 
