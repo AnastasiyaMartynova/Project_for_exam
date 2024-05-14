@@ -7,17 +7,17 @@ from os.path import isfile, join
 
 pygame.init()
 
-pygame.display.set_caption("Platformer")               # Заголовок окна
+pygame.display.set_caption("Platformer")                                                   # Заголовок окна
 
-WIDTH, HEIGHT = 1000, 800                              # Ширина и высота окна
-FPS = 60                                               # Фэпусы
-PLAYER_VEL = 5                                         # Скорость игрока
+WIDTH, HEIGHT = 1000, 800                                                                  # Ширина и высота окна
+FPS = 60                                                                                   # Фэпусы
+PLAYER_VEL = 5                                                                             # Скорость игрока
 
-window = pygame.display.set_mode((WIDTH, HEIGHT))      #Создать окно с указанными размерами 
+window = pygame.display.set_mode((WIDTH, HEIGHT))                                          #Создать окно с указанными размерами 
 
 
-def flip(sprites):                                                                          # Отражение спрайтов по горизонтали 
-    return [pygame.transform.flip(sprite, True, False) for sprite in sprites]               # True - отражает False - не отражает      # Всё это для направления движения персонажа в игре
+def flip(sprites):                                                                         # Отражение спрайтов по горизонтали 
+    return [pygame.transform.flip(sprite, True, False) for sprite in sprites]              # True - отражает False - не отражает      # Всё это для направления движения персонажа в игре
 
 
 def load_sprite_sheets(dir1, dir2, width, height, direction=False):                        # Функция загружает спрайты из заданной директории и разбивает на отдельные изображения; dir - это параметры для указания пути, direction - должны ли спрайты разделяться на направления 
@@ -330,21 +330,31 @@ def main(window):
     player = Player(100, 100, 50, 50)
     floor = [Block(i * block_size, HEIGHT - block_size, block_size)
              for i in range(-WIDTH // block_size, (WIDTH * 2) // block_size)]
-    objects = [*floor, Block(0, HEIGHT - block_size * 2, block_size),
-               Block(block_size * 3, HEIGHT - block_size * 4, block_size)]
 
     offset_x = 0
     scroll_area_width = 200
 
 
-    start = Start(200, HEIGHT - block_size * 1.5, block_size) 
-    finish = Finish(WIDTH - block_size * 3, HEIGHT - block_size * 1.5, block_size) 
+    start = Start(600, HEIGHT - block_size * 4.5, block_size) 
+    finish = Finish(1500, HEIGHT - block_size * 6.5, block_size) 
     
-    thorn = Thorn(500, HEIGHT - block_size - 64, 16, 32)
+    thorn = Thorn(900, HEIGHT - block_size * 4.6, 16, 32)
     thorn.awake()
 
+    block_line = Block(block_size * 3, HEIGHT - block_size * 4, block_size)                 # Линия из нескольких блоков
+
     objects = [*floor, Block(0, HEIGHT - block_size * 2, block_size),
-               Block(block_size * 3, HEIGHT - block_size * 4, block_size), start, finish, thorn]
+               Block(block_size * 3, HEIGHT - block_size * 4, block_size), 
+               start, finish, thorn,
+               block_line]
+    
+    for i in range(8):                                                                      # Чтобы линия была линией
+        new_block = Block(block_size * (i + 5), HEIGHT - block_size * 4, block_size)
+        objects.append(new_block)
+
+    for i in range(3):                                                                      
+        new_block = Block(block_size * (i + 14), HEIGHT - block_size * 6, block_size)
+        objects.append(new_block)
 
     run = True
     while run:
