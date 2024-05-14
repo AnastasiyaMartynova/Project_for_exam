@@ -209,11 +209,14 @@ class Thorn(Object):
 
     def __init__(self, x, y, width, height):
         super().__init__(x, y, width, height, "thorn")
-        self.fire = load_sprite_sheets("Enemies", "Thorn", width, height)
-        self.image = self.fire["sleep"][0]
+        self.thorn = load_sprite_sheets("Enemies", "Thorn", width, height)
+        self.image = self.thorn["sleep"][0]
         self.mask = pygame.mask.from_surface(self.image)
         self.animation_count = 0
         self.animation_name = "sleep"
+        self.timer = 0                                                                 # Каждые 10 секунд колючка переходит в режим сна на 10 секунд
+        self.sleep_duration = 10 * FPS
+        self.awake_duration = 10 * FPS
 
     def awake(self):
         self.animation_name = "awake"
@@ -222,7 +225,7 @@ class Thorn(Object):
         self.animation_name = "sleep"
 
     def loop(self):
-        sprites = self.fire[self.animation_name]
+        sprites = self.thorn[self.animation_name]
         sprite_index = (self.animation_count //
                         self.ANIMATION_DELAY) % len(sprites)
         self.image = sprites[sprite_index]
@@ -233,6 +236,14 @@ class Thorn(Object):
 
         if self.animation_count // self.ANIMATION_DELAY > len(sprites):
             self.animation_count = 0
+
+        self.timer += 1                                                                 # Обновление таймера
+        if self.animation_name == "awake" and self.timer >= self.awake_duration:
+            self.sleep()
+            self.timer = 0
+        elif self.animation_name == "sleep" and self.timer >= self.sleep_duration:
+            self.awake()
+            self.timer = 0
 
 
 def get_background(name):                                                               # Это фон, он состоит из множетсва фрагментов изображения
@@ -306,8 +317,8 @@ def handle_move(player, objects):
     to_check = [collide_left, collide_right, *vertical_collide]
 
     for obj in to_check:
-        if obj and obj.name == "thorn":
-            player.make_hit()
+        if obj and obj.name == "thorn" and obj.animation_name == "awake":                  # Проверка на столкновение игрока с колючкой
+            player.make_hit()                                                              # Игрок не получает удар, если колючка спит
 
 
 def main(window):
