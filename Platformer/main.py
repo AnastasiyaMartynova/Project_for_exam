@@ -247,7 +247,7 @@ class Thorn(Object):
             self.timer = 0
 
 class Coins(Object):
-    ANIMATION_DELAY = 3
+    ANIMATION_DELAY = 7
 
     def __init__(self, x, y, width, height):
         super().__init__(x, y, width, height, "coins")
@@ -388,14 +388,17 @@ def main(window):
     thorn = Thorn(900, HEIGHT - block_size * 4.6, 16, 32)
     thorn.awake()
 
-    coins = Coins(100, HEIGHT - block_size - 64, 16, 32)
+    coins = Coins(750, HEIGHT - block_size * 4.7, 16, 32)
     coins.on()
+
+    coins2 = Coins(1100, HEIGHT - block_size * 5.6, 16, 32)
+    coins2.on()
 
     block_line = Block(block_size * 3, HEIGHT - block_size * 4, block_size)                 # Линия из нескольких блоков
 
     objects = [*floor, Block(0, HEIGHT - block_size * 2, block_size),
                Block(block_size * 3, HEIGHT - block_size * 4, block_size), 
-               start, finish, thorn, coins,
+               start, finish, thorn, coins, coins2,
                block_line]
     
     for i in range(8):                                                                      # Чтобы линия была линией
@@ -435,6 +438,7 @@ def main(window):
 
         thorn.loop()
         coins.loop()
+        coins2.loop()
 
         handle_move(player, objects)
         draw(window, background, bg_image, player, objects, offset_x)
