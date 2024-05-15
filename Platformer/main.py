@@ -256,6 +256,7 @@ class Coins(Object):
         self.mask = pygame.mask.from_surface(self.image)
         self.animation_count = 0
         self.animation_name = "off"
+        self.collected = False                                                           # Изначально монета не собрана
 
     def on(self):
         self.animation_name = "on"
@@ -264,17 +265,22 @@ class Coins(Object):
         self.animation_name = "off"
 
     def loop(self):
-        sprites = self.coins[self.animation_name]
-        sprite_index = (self.animation_count //
-                        self.ANIMATION_DELAY) % len(sprites)
-        self.image = sprites[sprite_index]
-        self.animation_count += 1
+        if not self.collected:                                                          # Проверка, не собрана ли уже монета
+            sprites = self.coins[self.animation_name]
+            sprite_index = (self.animation_count //
+                            self.ANIMATION_DELAY) % len(sprites)
+            self.image = sprites[sprite_index]
+            self.animation_count += 1
 
-        self.rect = self.image.get_rect(topleft=(self.rect.x, self.rect.y))
-        self.mask = pygame.mask.from_surface(self.image)
+            self.rect = self.image.get_rect(topleft=(self.rect.x, self.rect.y))
+            self.mask = pygame.mask.from_surface(self.image)
 
-        if self.animation_count // self.ANIMATION_DELAY > len(sprites):
-            self.animation_count = 0
+            if self.animation_count // self.ANIMATION_DELAY > len(sprites):
+                self.animation_count = 0
+
+    def collect(self):
+        self.collected = True                                                           # Флаг собранной монеты
+        self.rect.x = -1000                                                             # Поместить моенту за пределы экрана
 
 
 def get_background(name):                                                               # Это фон, он состоит из множетсва фрагментов изображения
@@ -352,12 +358,12 @@ def handle_move(player, objects):
             player.make_hit()                                                              # Игрок не получает удар, если колючка спит
 
 
-def game_over_screen(window):                                                              # Экран конца игры
-    window.fill((255, 100, 180))                                                           # Заливка окна розовым цветом
+def game_over_screen(window, collected_coins):                                             # Экран конца игры
+    window.fill((255, 100, 180))                                                           # Розовый цвет
     font = pygame.font.Font(None, 36)
-    text = font.render("Игра закончена", True, (255, 255, 255))                            # Создание надписи белым цветом
-    text_rect = text.get_rect(center=(window.get_width() // 2, window.get_height() // 2))  # Позиционирование текста по центру 
-    window.blit(text, text_rect)                                                           # Отображение текста на экране
+    text = font.render(f"Игра закончена. Собрано рублей: {collected_coins}", True, (255, 255, 255))
+    text_rect = text.get_rect(center=(window.get_width() // 2, window.get_height() // 2))
+    window.blit(text, text_rect)
     pygame.display.flip()                                                                  # Обновление экрана
 
 def start_menu_screen(window):                                                             # Стартовое меню
@@ -393,7 +399,7 @@ def main(window):
 
     coins2 = Coins(1100, HEIGHT - block_size * 5.6, 16, 32)
     coins2.on()
-
+    collected_coins = 0  # Счетчик собранных монет
     block_line = Block(block_size * 3, HEIGHT - block_size * 4, block_size)                 # Линия из нескольких блоков
 
     objects = [*floor, Block(0, HEIGHT - block_size * 2, block_size),
@@ -441,12 +447,17 @@ def main(window):
         coins2.loop()
 
         handle_move(player, objects)
+        for obj in objects:
+            if isinstance(obj, Coins) and not obj.collected and player.rect.colliderect(obj.rect):
+                obj.collect()                                                              # Собираем монету
+                collected_coins += 1                                                       # Увеличить счетчик собранных монет
+
         draw(window, background, bg_image, player, objects, offset_x)
 
-        if player.rect.colliderect(finish.rect):                                            # Проверка на касание финиша
-            game_over_screen(window)                                                        # Показать экран
-            pygame.time.delay(2000)                                                         # Подождать 2 секунды
-            run = False                                                                     # Закончить игровой цикл
+        if player.rect.colliderect(finish.rect):
+            game_over_screen(window, collected_coins)                                      # Передать количество собранных монет на экран конца игры
+            pygame.time.delay(2000)
+            run = False                                                                    # Закончить игровой цикл
 
         if ((player.rect.right - offset_x >= WIDTH - scroll_area_width) and player.x_vel > 0) or (
                 (player.rect.left - offset_x <= scroll_area_width) and player.x_vel < 0):
