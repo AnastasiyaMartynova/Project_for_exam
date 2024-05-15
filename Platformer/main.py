@@ -1,7 +1,3 @@
-import os
-import random
-import math
-import sys
 import pygame
 from os import listdir
 from os.path import isfile, join
@@ -11,7 +7,7 @@ pygame.init()
 pygame.display.set_caption("Platformer")                                                   # Заголовок окна
 
 WIDTH, HEIGHT = 1000, 800                                                                  # Ширина и высота окна
-FPS = 60                                                                                   # Фэпусы
+FPS = 70                                                                                   # Фэпусы
 PLAYER_VEL = 5                                                                             # Скорость игрока
 
 window = pygame.display.set_mode((WIDTH, HEIGHT))                                          #Создать окно с указанными размерами 
@@ -369,7 +365,7 @@ def game_over_screen(window, collected_coins):                                  
 def start_menu_screen(window):                                                             # Стартовое меню
     window.fill((240, 0, 255))
     font = pygame.font.Font(None, 36)
-    text = font.render("Это стартовое меню. Нажмите клавишу Enter.", True, (255, 255, 255))
+    text = font.render("Нажмите клавишу Enter. До этого нажмите q, если хотите играть за черную кошку.", True, (255, 255, 255))
     text_rect = text.get_rect(center=(window.get_width() // 2, window.get_height() // 2))
     window.blit(text, text_rect)
     pygame.display.flip()
@@ -399,7 +395,7 @@ def main(window):
 
     coins2 = Coins(1100, HEIGHT - block_size * 5.6, 16, 32)
     coins2.on()
-    collected_coins = 0  # Счетчик собранных монет
+    collected_coins = 0                                                                     # Счетчик собранных монет
     block_line = Block(block_size * 3, HEIGHT - block_size * 4, block_size)                 # Линия из нескольких блоков
 
     objects = [*floor, Block(0, HEIGHT - block_size * 2, block_size),
@@ -416,6 +412,7 @@ def main(window):
         objects.append(new_block)
 
     start_menu_screen(window)                                                               # Отображение стартового меню
+    black_kitty_mode = False                                                                # Переменная для отслеживания выбора черной кошки
     while True:                                                                             # Ожидание нажатия клавиши Enter для перехода к игре
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -423,10 +420,14 @@ def main(window):
                 quit()
             if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
                 break
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
+                black_kitty_mode = True  # Устанавливаем режим черной кошки
         
         if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
             break
 
+    if black_kitty_mode:                                                                    # Загрузка спрайтов черной кошки, если выбран этот режим
+        Player.SPRITES = load_sprite_sheets("Character", "BlackKitty", 32, 32, True)
     run = True
     while run:
         clock.tick(FPS)
