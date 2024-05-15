@@ -1,6 +1,7 @@
 import os
 import random
 import math
+import sys
 import pygame
 from os import listdir
 from os.path import isfile, join
@@ -32,7 +33,7 @@ def load_sprite_sheets(dir1, dir2, width, height, direction=False):             
         sprites = []                                                                       # Список для отдельных изображений спрайтов 
         for i in range(sprite_sheet.get_width() // width):                                 # Этот цикл перебирает все кадры (спрайты) в изображении спрайтов, вычисляя количество кадров по горизонтали, чтобы разделить спрайт-лист на отдельные изображения.
             surface = pygame.Surface((width, height), pygame.SRCALPHA, 32)                 # Создается поверхность для отдельного кадра спрайта. Формат pygame.SRCALPHA используется для создания поверхности с альфа-каналом, что позволяет управлять прозрачностью.
-            rect = pygame.Rect(i * width, 0, width, height)                                # Создается прямоугольник (Rect), который определяет область изображения текущего кадра на изображении спрайтов.
+            rect = pygame.Rect(i * width, 0, width, height)                                # Создается прямоугольник, который определяет область изображения текущего кадра на изображении спрайтов.
             surface.blit(sprite_sheet, (0, 0), rect)                                       # Отдельный кадр спрайта копируется с изображения спрайтов на созданную поверхность для того, чтобы вырезать отдельный кадр изображения спрайтов.
             sprites.append(pygame.transform.scale2x(surface))                              # Скопированный кадр спрайта увеличивается в два раза и добавляется в список для увеличения размера спрайтов для более крупного отображения на экране.
 
@@ -321,6 +322,14 @@ def handle_move(player, objects):
             player.make_hit()                                                              # Игрок не получает удар, если колючка спит
 
 
+def game_over_screen(window):                                                              # Экран конца игры
+    window.fill((255, 100, 180))                                                           # Заливка окна розовым цветом
+    font = pygame.font.Font(None, 36)
+    text = font.render("Игра закончена", True, (255, 255, 255))                            # Создание надписи белым цветом
+    text_rect = text.get_rect(center=(window.get_width() // 2, window.get_height() // 2))  # Позиционирование текста по центру 
+    window.blit(text, text_rect)                                                           # Отображение текста на экране
+    pygame.display.flip()                                                                  # Обновление экрана
+
 def main(window):
     clock = pygame.time.Clock()
     background, bg_image = get_background("Blue.png")
@@ -375,6 +384,11 @@ def main(window):
 
         handle_move(player, objects)
         draw(window, background, bg_image, player, objects, offset_x)
+
+        if player.rect.colliderect(finish.rect):                                            # Проверка на касание финиша
+            game_over_screen(window)                                                        # Показать экран
+            pygame.time.delay(2000)                                                         # Подождать 2 секунды
+            run = False                                                                     # Закончить игровой цикл
 
         if ((player.rect.right - offset_x >= WIDTH - scroll_area_width) and player.x_vel > 0) or (
                 (player.rect.left - offset_x <= scroll_area_width) and player.x_vel < 0):
