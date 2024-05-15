@@ -246,6 +246,36 @@ class Thorn(Object):
             self.awake()
             self.timer = 0
 
+class Coins(Object):
+    ANIMATION_DELAY = 3
+
+    def __init__(self, x, y, width, height):
+        super().__init__(x, y, width, height, "coins")
+        self.coins = load_sprite_sheets("Trophies", "Coins", width, height)
+        self.image = self.coins["off"][0]
+        self.mask = pygame.mask.from_surface(self.image)
+        self.animation_count = 0
+        self.animation_name = "off"
+
+    def on(self):
+        self.animation_name = "on"
+
+    def off(self):
+        self.animation_name = "off"
+
+    def loop(self):
+        sprites = self.coins[self.animation_name]
+        sprite_index = (self.animation_count //
+                        self.ANIMATION_DELAY) % len(sprites)
+        self.image = sprites[sprite_index]
+        self.animation_count += 1
+
+        self.rect = self.image.get_rect(topleft=(self.rect.x, self.rect.y))
+        self.mask = pygame.mask.from_surface(self.image)
+
+        if self.animation_count // self.ANIMATION_DELAY > len(sprites):
+            self.animation_count = 0
+
 
 def get_background(name):                                                               # Это фон, он состоит из множетсва фрагментов изображения
     image = pygame.image.load(join("assets", "Background", name))
@@ -333,7 +363,7 @@ def game_over_screen(window):                                                   
 def start_menu_screen(window):                                                             # Стартовое меню
     window.fill((240, 0, 255))
     font = pygame.font.Font(None, 36)
-    text = font.render("Это стартовое меню. Нажмите клавишу Enter.", True, (255, 255, 255))                            # Фиолетовый
+    text = font.render("Это стартовое меню. Нажмите клавишу Enter.", True, (255, 255, 255))
     text_rect = text.get_rect(center=(window.get_width() // 2, window.get_height() // 2))
     window.blit(text, text_rect)
     pygame.display.flip()
@@ -358,11 +388,14 @@ def main(window):
     thorn = Thorn(900, HEIGHT - block_size * 4.6, 16, 32)
     thorn.awake()
 
+    coins = Coins(100, HEIGHT - block_size - 64, 16, 32)
+    coins.on()
+
     block_line = Block(block_size * 3, HEIGHT - block_size * 4, block_size)                 # Линия из нескольких блоков
 
     objects = [*floor, Block(0, HEIGHT - block_size * 2, block_size),
                Block(block_size * 3, HEIGHT - block_size * 4, block_size), 
-               start, finish, thorn,
+               start, finish, thorn, coins,
                block_line]
     
     for i in range(8):                                                                      # Чтобы линия была линией
