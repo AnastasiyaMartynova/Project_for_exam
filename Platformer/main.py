@@ -434,6 +434,7 @@ def main(window):
         player.loop(FPS)
 
         thorn.loop()
+        coins.loop()
 
         handle_move(player, objects)
         draw(window, background, bg_image, player, objects, offset_x)
