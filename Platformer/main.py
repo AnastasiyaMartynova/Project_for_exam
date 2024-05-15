@@ -330,6 +330,14 @@ def game_over_screen(window):                                                   
     window.blit(text, text_rect)                                                           # Отображение текста на экране
     pygame.display.flip()                                                                  # Обновление экрана
 
+def start_menu_screen(window):                                                             # Стартовое меню
+    window.fill((240, 0, 255))
+    font = pygame.font.Font(None, 36)
+    text = font.render("Это стартовое меню. Нажмите клавишу Enter.", True, (255, 255, 255))                            # Фиолетовый
+    text_rect = text.get_rect(center=(window.get_width() // 2, window.get_height() // 2))
+    window.blit(text, text_rect)
+    pygame.display.flip()
+
 def main(window):
     clock = pygame.time.Clock()
     background, bg_image = get_background("Blue.png")
@@ -364,6 +372,18 @@ def main(window):
     for i in range(3):                                                                      
         new_block = Block(block_size * (i + 14), HEIGHT - block_size * 6, block_size)
         objects.append(new_block)
+
+    start_menu_screen(window)                                                               # Отображение стартового меню
+    while True:                                                                             # Ожидание нажатия клавиши Enter для перехода к игре
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+                break
+        
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+            break
 
     run = True
     while run:
