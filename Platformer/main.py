@@ -1,4 +1,5 @@
 import pygame
+import time 
 from os import listdir
 from os.path import isfile, join
 
@@ -70,6 +71,15 @@ class Player(pygame.sprite.Sprite):
         self.hit = False
         self.hit_count = 0
 
+        self.lives = 3
+        self.health_images = [
+            pygame.image.load('assets/Health/Health1.png'),
+            pygame.image.load('assets/Health/Health2.png'),
+            pygame.image.load('assets/Health/Health3.png')
+        ]
+        self.current_health_image = self.health_images[2]
+        self.last_hit_time = None
+
     def jump(self):
         self.y_vel = -self.GRAVITY * 8                                                    # (Умножение на -1 для того, чтбы прыгал вверх, на 8 для регулировки прыжка)
         self.animation_count = 0
@@ -82,7 +92,30 @@ class Player(pygame.sprite.Sprite):
         self.rect.y += dy
 
     def make_hit(self):
-        self.hit = True
+        current_time = time.time()
+
+        if self.current_health_image == self.health_images[2]:
+            self.hit = True
+            self.hit_count += 1
+            if self.lives > 0:
+                self.lives -= 1
+                self.current_health_image = self.health_images[self.lives]
+            self.last_hit_time = current_time 
+        elif self.current_health_image == self.health_images[1]:
+            if self.last_hit_time is None or current_time - self.last_hit_time >= 3:
+                self.hit = True
+                self.hit_count += 1
+                if self.lives > 0:
+                    self.lives -= 1
+                    self.current_health_image = self.health_images[self.lives]
+                self.last_hit_time = current_time 
+        else:
+            self.hit = True
+            self.hit_count += 1
+            if self.lives > 0:
+                self.lives -= 1
+                self.current_health_image = self.health_images[self.lives]
+            self.last_hit_time = current_time 
 
     def move_left(self, vel):
         self.x_vel = -vel
@@ -301,6 +334,8 @@ def draw(window, background, bg_image, player, objects, offset_x):              
 
     player.draw(window, offset_x)
 
+    window.blit(player.current_health_image, (window.get_width() - player.current_health_image.get_width() - 10, 10))
+
     pygame.display.update()
 
 
@@ -463,6 +498,11 @@ def main(window):
         if ((player.rect.right - offset_x >= WIDTH - scroll_area_width) and player.x_vel > 0) or (
                 (player.rect.left - offset_x <= scroll_area_width) and player.x_vel < 0):
             offset_x += player.x_vel
+
+        if player.lives <= 0:
+            game_over_screen(window, collected_coins)
+            pygame.time.delay(2000)
+            run = False
 
     pygame.quit()
     quit()
